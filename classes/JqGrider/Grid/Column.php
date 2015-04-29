@@ -97,7 +97,7 @@ class Column
     /**
      * @return boolean
      */
-    public function isSearchOptions()
+    public function getSearchOptions()
     {
         return $this->searchOptions;
     }
