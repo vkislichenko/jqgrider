@@ -16,7 +16,7 @@ use JqGrider\Data\Conditions;
 use JqGrider\Data\IGridRepository;
 use JqGrider\Grid\Column;
 use JqGrider\Grid\ColumnCollection;
-
+use Zend\Json\Json;
 class Grid
 {
 	const DATA_TYPE_XML = 'xml';
@@ -28,6 +28,7 @@ class Grid
 	const SORT_ORDER_ASC = 'asc';
 
 	const SORT_ORDER_DESC = 'desc';
+
 
 
 	/**
@@ -46,6 +47,25 @@ class Grid
 	 */
 	protected $_dataTypeStrategy;
 
+    protected $jsonReader;
+
+    /**
+     * @return mixed
+     */
+    public function getJsonReader()
+    {
+        return $this->jsonReader;
+    }
+
+    /**
+     * @param mixed $jsonReader
+     */
+    public function setJsonReader($jsonReader)
+    {
+        $this->jsonReader = $jsonReader;
+
+        return $this;
+    }
 	/**
 	 *
 	 * Columns
@@ -58,7 +78,7 @@ class Grid
 	 * Grid caption
 	 * @var string
 	 */
-	protected $caption = 'its me';
+	protected $caption;
 
 	/**
 	 *
@@ -86,7 +106,190 @@ class Grid
 	 * HTML ID Tag for div where js will generate pager for grid
 	 * @var string
 	 */
-	protected $pagerDivIdentifier = '#pager2';
+	protected $pagerDivIdentifier = '#pager1';
+
+
+    protected $gridIdentifier = '#grid1';
+
+    protected $height;
+
+    protected $width;
+
+    /**
+     * @return string
+     */
+    public function getDataUrl()
+    {
+        return $this->dataUrl;
+    }
+
+    /**
+     * @param string $dataUrl
+     * @return Grid
+     */
+    public function setDataUrl($dataUrl)
+    {
+        $this->dataUrl = $dataUrl;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getRowsPerPage()
+    {
+        return $this->rowsPerPage;
+    }
+
+    /**
+     * @param int $rowsPerPage
+     * @return Grid
+     */
+    public function setRowsPerPage($rowsPerPage)
+    {
+        $this->rowsPerPage = $rowsPerPage;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getHeight()
+    {
+        return $this->height;
+    }
+
+    /**
+     * @param mixed $height
+     * @return Grid
+     */
+    public function setHeight($height)
+    {
+        $this->height = $height;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getWidth()
+    {
+        return $this->width;
+    }
+
+    /**
+     * @param mixed $width
+     * @return Grid
+     */
+    public function setWidth($width)
+    {
+        $this->width = $width;
+        return $this;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isViewRecords()
+    {
+        return $this->viewRecords;
+    }
+
+    /**
+     * @param boolean $viewRecords
+     * @return Grid
+     */
+    public function setViewRecords($viewRecords)
+    {
+        $this->viewRecords = $viewRecords;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRowList()
+    {
+        return $this->rowList;
+    }
+
+    /**
+     * @param array $rowList
+     * @return Grid
+     */
+    public function setRowList($rowList)
+    {
+        $this->rowList = $rowList;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSortOrder()
+    {
+        return $this->sortOrder;
+    }
+
+    /**
+     * @param string $sortOrder
+     * @return Grid
+     */
+    public function setSortOrder($sortOrder)
+    {
+        $this->sortOrder = $sortOrder;
+        return $this;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isLoadOnce()
+    {
+        return $this->loadOnce;
+    }
+
+    /**
+     * @param boolean $loadOnce
+     * @return Grid
+     */
+    public function setLoadOnce($loadOnce)
+    {
+        $this->loadOnce = $loadOnce;
+        return $this;
+    }
+    /**
+     * @return string
+     */
+    public function getGridIdentifier()
+    {
+        return $this->gridIdentifier;
+    }
+
+    /**
+     * @param string $gridIdentifier
+     */
+    public function setGridIdentifier($gridIdentifier)
+    {
+        $this->gridIdentifier = $gridIdentifier;
+        return $this;
+    }
+    /**
+     * @return string
+     */
+    public function getPagerDivIdentifier()
+    {
+        return $this->pagerDivIdentifier;
+    }
+
+    /**
+     * @param string $pagerDivIdentifier
+     */
+    public function setPagerDivIdentifier($pagerDivIdentifier)
+    {
+        $this->pagerDivIdentifier = $pagerDivIdentifier;
+        return $this;
+    }
 
 	/**
 	 *
@@ -139,6 +342,12 @@ class Grid
 		$this->_dataTypeStrategy = Data\Type\Factory::createImplementator($this->dataType);
 	}
 
+    public function setCaption($caption)
+    {
+        $this->caption = $caption;
+
+        return $this;
+    }
 	/**
 	 *
 	 * Add column to Grid
@@ -165,7 +374,7 @@ class Grid
 		
 		$options = $this->_dataTypeStrategy->addDetailsToOptions($options, $this);
 		
-		return json_encode($options);
+		return Json::encode($options);
 	}
 	
 	/**
@@ -175,8 +384,9 @@ class Grid
 	{
 		$jsonInit = $this->toJson();
 		$js = <<<JS
-	jQuery("#list2").jqGrid($jsonInit);
-	jQuery("#list2").jqGrid('navGrid','$this->pagerDivIdentifier',{edit:false,add:false,del:false});
+	jQuery("{$this->gridIdentifier}").jqGrid($jsonInit);
+	jQuery("{$this->gridIdentifier}").jqGrid('navGrid','$this->pagerDivIdentifier',{edit:false,add:false,del:false});
+	jQuery("{$this->gridIdentifier}").jqGrid('filterToolbar','$this->pagerDivIdentifier',{searchOperators : false});
 JS;
 		if ($moreJs = $this->_dataTypeStrategy->getAditionalJavaScript() and $js .= $moreJs);
 		return $js;
@@ -201,7 +411,8 @@ JS;
 	{
 		return array(
 			'datatype' 		=> $this->dataType,
-			'caption' 		=> $this->caption
+			'caption' 		=> $this->caption,
+            'height'        => $this->getHeight()
 		);	
 	}
 	
@@ -220,8 +431,9 @@ JS;
 			$columnModel[] = array(
 						'name' 		=> $column->getRepositoryAttribute(),
 						'index' 	=> $column->getRepositoryAttribute(),
-						'width' 	=> $column->getWidth(),
+
 			);
+
 		}
 		
 		
