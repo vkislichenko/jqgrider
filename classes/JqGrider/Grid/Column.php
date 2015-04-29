@@ -53,7 +53,28 @@ class Column
 	 * @var Anonymous function
 	 */
 	protected $callbackFunction;
-	
+
+    protected $searchOptions;
+
+    /**
+     * @return string
+     */
+    public function getAlign()
+    {
+        return $this->align;
+    }
+
+    /**
+     * @param string $align
+     * @return Column
+     */
+    public function setAlign($align)
+    {
+        $this->align = $align;
+        return $this;
+    }
+
+    protected $searchType;
 	/**
 	 * 
 	 * Constructor
@@ -63,13 +84,15 @@ class Column
 	 * @param int $width
 	 * @param mixed $callbackFunction
 	 */
-	public function __construct($title, $repositoryAttribute, $width, $callbackFunction = false)
+	public function __construct($title, $repositoryAttribute, $width,
+                                $callbackFunction = false,$searchOptions=false, $searchType='stext')
 	{
 		$this->title = $title;
 		$this->repositoryAttribute = $repositoryAttribute;
 		$this->width = $width;
-		
 		$this->callbackFunction = $callbackFunction;
+        $this->searchOptions = $searchOptions;
+        $this->searchType = $searchType;
 	}
 	
 	/**

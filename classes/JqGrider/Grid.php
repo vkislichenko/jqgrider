@@ -431,9 +431,11 @@ JS;
 			$columnModel[] = array(
 						'name' 		=> $column->getRepositoryAttribute(),
 						'index' 	=> $column->getRepositoryAttribute(),
-
+                        'stype'     => $column->getSearchType()
 			);
-
+            if(!empty($column->getSearchOptions())){
+                $columnModel['searchoptions'] = $column->getSearchOptions();
+            }
 		}
 		
 		
