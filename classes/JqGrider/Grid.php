@@ -355,9 +355,9 @@ class Grid
 	 * @param string $repositoryAttribute
 	 * @param int $width
 	 */
-	public function addColumn($title, $repositoryAttribute, $width, $callbackFunction = false)
+	public function addColumn($title, $repositoryAttribute, $width, $callbackFunction = false, $searchOptions)
 	{
-		$this->columnCollection->add(new Column($title, $repositoryAttribute, $width, $callbackFunction));
+		$this->columnCollection->add(new Column($title, $repositoryAttribute, $width, $callbackFunction,$searchOptions));
 
 		return $this;
 	}
@@ -373,8 +373,12 @@ class Grid
 		$options = $this->addColumnsToOptions($options);
 		
 		$options = $this->_dataTypeStrategy->addDetailsToOptions($options, $this);
-		
-		return Json::encode($options);
+
+        return Json::encode(
+            $options,
+            false,
+            array('enableJsonExprFinder' => true)
+        );
 	}
 	
 	/**
@@ -383,10 +387,24 @@ class Grid
 	public function getJavaScriptCode()
 	{
 		$jsonInit = $this->toJson();
-		$js = <<<JS
+        $js = '';
+        if(!empty($this->postDataFields)){
+            $js = 'var arrPostDataFields = [' . join('","', $this->postDataFields) . ']';
+        }
+		$js .= <<<JS
+    var objPostData={};
+    if(arrPostDataFields){
+        jQuery.each(arrPostDataFields, function( index, value ) {
+          objPostData[value] = jQuery('#'+value).value();
+        });
+    }
+    console.log(arrPostData);
 	jQuery("{$this->gridIdentifier}").jqGrid($jsonInit);
 	jQuery("{$this->gridIdentifier}").jqGrid('navGrid','$this->pagerDivIdentifier',{edit:false,add:false,del:false});
 	jQuery("{$this->gridIdentifier}").jqGrid('filterToolbar','$this->pagerDivIdentifier',{searchOperators : false});
+	jQuery("{$this->gridIdentifier}").setGridParam({ postData:  objPostData});
+
+
 JS;
 		if ($moreJs = $this->_dataTypeStrategy->getAditionalJavaScript() and $js .= $moreJs);
 		return $js;
@@ -428,23 +446,34 @@ JS;
 		foreach ($this->columnCollection as $column)
 		{
 			$columnNames[] = $column->getTitle();
-			$columnModel[] = array(
-						'name' 		=> $column->getRepositoryAttribute(),
-						'index' 	=> $column->getRepositoryAttribute(),
-                        'stype'     => $column->getSearchType()
-			);
+            $columnModelAttributes = array(
+                'name' 		=> $column->getRepositoryAttribute(),
+                'index' 	=> $column->getRepositoryAttribute(),
+
+            );
+
             if(!empty($column->getSearchOptions())){
-                $columnModel['searchoptions'] = $column->getSearchOptions();
+                $columnModelAttributes['stype']     = $column->getSearchType()?:'text';
+                $columnModelAttributes['searchoptions'] = $column->getSearchOptions();
             }
+            $columnModel[] = $columnModelAttributes;
 		}
-		
-		
+
+
 		$options['colNames'] = $columnNames;
 		$options['colModel'] = $columnModel;
 
 		return $options;
 	}
-	
+    /**
+     * @param string $sortName
+     * @return Grid
+     */
+    public function setSortName($sortName)
+    {
+        $this->sortName = $sortName;
+        return $this;
+    }
 	/**
 	 * Set respository
 	 * 

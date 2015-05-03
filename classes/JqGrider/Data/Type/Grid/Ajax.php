@@ -26,6 +26,8 @@ class Ajax extends Data_Type_Grid_Abstract
 		$options['viewrecords'] = $grid->viewRecords;
 		$options['rowNum'] 		= $grid->rowsPerPage;
 		$options['sortorder'] 	= $grid->sortOrder;
+
+
         if(!empty($grid->getJsonReader())) {
             $options['jsonReader'] = $grid->getJsonReader();
         }

@@ -121,14 +121,13 @@ class Column
 	 * @param mixed $callbackFunction
 	 */
 	public function __construct($title, $repositoryAttribute, $width,
-                                $callbackFunction = false,$searchOptions=false, $searchType='stext')
+                                $callbackFunction = false,$searchOptions=false)
 	{
 		$this->title = $title;
 		$this->repositoryAttribute = $repositoryAttribute;
 		$this->width = $width;
 		$this->callbackFunction = $callbackFunction;
         $this->searchOptions = $searchOptions;
-        $this->searchType = $searchType;
 	}
 	
 	/**
