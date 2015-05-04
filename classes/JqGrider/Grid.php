@@ -20,11 +20,11 @@ use Zend\Json\Json;
 class Grid
 {
 	const DATA_TYPE_XML = 'xml';
-	
+
 	const DATA_TYPE_JSON = 'json';
-	
+
 	const DATA_TYPE_LOCAL = 'local';
-	
+
 	const SORT_ORDER_ASC = 'asc';
 
 	const SORT_ORDER_DESC = 'desc';
@@ -38,10 +38,10 @@ class Grid
 	 * @var Data\IGridRepository
 	 */
 	protected $_repository;
-	
-	
+
+
 	/**
-	 * 
+	 *
 	 * Data Type Strategy Object
 	 * @var Data_Type_Abstract
 	 */
@@ -291,6 +291,24 @@ class Grid
         return $this;
     }
 
+    protected $postDataFields;
+
+    /**
+     * @return mixed
+     */
+    public function getPostDataFields()
+    {
+        return $this->postDataFields;
+    }
+
+    /**
+     * @param mixed $postDataFields
+     */
+    public function setPostDataFields($postDataFields)
+    {
+        $this->postDataFields = $postDataFields;
+        return $this;
+    }
 	/**
 	 *
 	 * Repositiry attribute used for sort data
@@ -320,7 +338,7 @@ class Grid
 	 * @var string
 	 */
 	protected $sortOrder = self::SORT_ORDER_ASC;
-	
+
 	/**
 	 * Load once parameter
 	 * @var bool
@@ -329,16 +347,16 @@ class Grid
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param string $dataType
 	 * @param array $options
 	 */
 	public function __construct($dataType, $options = array())
 	{
 		$this->dataType = $dataType;
-		
+
 		$this->columnCollection = new ColumnCollection();
-		
+
 		$this->_dataTypeStrategy = Data\Type\Factory::createImplementator($this->dataType);
 	}
 
@@ -363,15 +381,15 @@ class Grid
 	}
 
 	/**
-	 * 
+	 *
 	 * Get json object initialization for grid
 	 */
 	public function toJson()
 	{
 		$options = $this->createOptions();
-		
+
 		$options = $this->addColumnsToOptions($options);
-		
+
 		$options = $this->_dataTypeStrategy->addDetailsToOptions($options, $this);
 
         return Json::encode(
@@ -380,7 +398,7 @@ class Grid
             array('enableJsonExprFinder' => true)
         );
 	}
-	
+
 	/**
 	 * Get grid javascript code
 	 */
@@ -388,39 +406,55 @@ class Grid
 	{
 		$jsonInit = $this->toJson();
         $js = '';
-        if(!empty($this->postDataFields)){
-            $js = 'var arrPostDataFields = [' . join('","', $this->postDataFields) . ']';
-        }
+
 		$js .= <<<JS
-    var objPostData={};
-    if(arrPostDataFields){
-        jQuery.each(arrPostDataFields, function( index, value ) {
-          objPostData[value] = jQuery('#'+value).value();
-        });
-    }
-    console.log(arrPostData);
-	jQuery("{$this->gridIdentifier}").jqGrid($jsonInit);
-	jQuery("{$this->gridIdentifier}").jqGrid('navGrid','$this->pagerDivIdentifier',{edit:false,add:false,del:false});
-	jQuery("{$this->gridIdentifier}").jqGrid('filterToolbar','$this->pagerDivIdentifier',{searchOperators : false});
-	jQuery("{$this->gridIdentifier}").setGridParam({ postData:  objPostData});
+
+
+        jQuery("{$this->gridIdentifier}").jqGrid($jsonInit);
+        jQuery("{$this->gridIdentifier}").jqGrid('navGrid','$this->pagerDivIdentifier',{edit:false,add:false,del:false});
+        jQuery("{$this->gridIdentifier}").jqGrid('filterToolbar','$this->pagerDivIdentifier',{searchOperators : false});
 
 
 JS;
 		if ($moreJs = $this->_dataTypeStrategy->getAditionalJavaScript() and $js .= $moreJs);
 		return $js;
 	}
-	
+
+
+    public function getGridFilterPostDataJS()
+    {
+        $js = '';
+
+        if(!empty($this->postDataFields)){
+            $js .= 'var arrPostDataFields = {};' ."\n";
+        }
+        foreach($this->postDataFields as $field => $jsonValue)
+        {
+            $js .= 'arrPostDataFields["'.$field.'"]' . ' = '  . str_replace("%field%",$field,$jsonValue)  . "\n";
+        }
+        $js .= <<<JS
+        var objPostData={};
+        if(arrPostDataFields){
+            jQuery.each(arrPostDataFields, function( index, value ) {
+              objPostData[index] = jQuery('#'+index).val();
+            });
+        }
+        console.log(objPostData);
+        jQuery("{$this->gridIdentifier}").setGridParam({ postData:  objPostData});
+JS;
+		return $js;
+    }
 	/**
-	 * 
+	 *
 	 * Template method for additional JS
 	 * for clid classes
-	 * 
+	 *
 	 * @return string
 	 */
 	public function getAditionalJavaScript() {
 		return;
 	}
-	
+
 	/**
 	 * Create initial options
 	 * @return multitype:string
@@ -431,9 +465,9 @@ JS;
 			'datatype' 		=> $this->dataType,
 			'caption' 		=> $this->caption,
             'height'        => $this->getHeight()
-		);	
+		);
 	}
-	
+
 	/**
 	 * Add columns option into option array
 	 * @param array $options
@@ -442,7 +476,7 @@ JS;
 	{
 		$columnNames = array();
 		$columnModel = array();
-		
+
 		foreach ($this->columnCollection as $column)
 		{
 			$columnNames[] = $column->getTitle();
@@ -476,17 +510,17 @@ JS;
     }
 	/**
 	 * Set respository
-	 * 
+	 *
 	 * Respository can be your model or array with data
 	 * @param IGridRepository $repository
 	 */
 	public function setRepository(IGridRepository $repository)
 	{
 		$this->_repository = $repository;
-		
+
 		return $this;
 	}
-	
+
 	/**
 	 * Get respository
 	 */
@@ -494,7 +528,7 @@ JS;
 	{
 		return $this->_repository;
 	}
-	
+
 	/**
 	 * Get sort attribute name
 	 */
@@ -502,15 +536,15 @@ JS;
 	{
 		return $this->sortName;
 	}
-	
+
 	/**
 	 * Get columns collection
 	 */
 	public function getColumnCollection()
 	{
 		return $this->columnCollection;
-	}	
-	
+	}
+
 	/**
 	 * Get data type
 	 */
@@ -518,7 +552,7 @@ JS;
 	{
 		return $this->dataType;
 	}
-	
+
 	/**
 	 * Set url to grab data for grid with ajax call
 	 * @param string $url
@@ -526,18 +560,18 @@ JS;
 	public function setUrl($url)
 	{
 		$this->dataUrl = $url;
-		
+
 		return $this;
 	}
-	
+
 	/**
 	 * Print resposiroty data in results format
 	 */
 	public function printRespositoryData()
-	{	
+	{
 		return RepositoryResult::printData($this);
 	}
-	
+
 	/**
 	 * Magicly call strategy methods over this object
 	 * @param string $method
@@ -550,7 +584,7 @@ JS;
 			return call_user_func_array(array($this->_dataTypeStrategy, $method), $args);
 		}
 	}
-	
+
 	/**
 	 * Magic getter
 	 * @param string $field
