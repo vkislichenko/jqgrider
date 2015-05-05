@@ -27,7 +27,8 @@ class Ajax extends Data_Type_Grid_Abstract
 		$options['rowNum'] 		= $grid->rowsPerPage;
 
 
-        if(!empty($grid->getJsonReader())) {
+        $jsonReader =$grid->getJsonReader();
+        if(!empty($jsonReader)) {
             $options['jsonReader'] = $grid->getJsonReader();
         }
 

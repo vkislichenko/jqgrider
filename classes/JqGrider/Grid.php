@@ -538,8 +538,8 @@ JS;
                 'index' 	=> $column->getRepositoryAttribute(),
 
             );
-
-            if(!empty($column->getSearchOptions())){
+            $searchOptions = $column->getSearchOptions();
+            if(!empty($searchOptions)){
                 $columnModelAttributes['stype']     = $column->getSearchType()?:'text';
                 $columnModelAttributes['searchoptions'] = $column->getSearchOptions();
             }
