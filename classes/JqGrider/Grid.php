@@ -309,6 +309,27 @@ class Grid
         $this->postDataFields = $postDataFields;
         return $this;
     }
+    protected $customNavButtons = array();
+
+    /**
+     * @return array
+     */
+    public function getCustomNavButtons()
+    {
+        return $this->customNavButtons;
+    }
+
+    /**
+     * @param array $customNavButtons
+     * @return Grid
+     */
+    public function setCustomNavButtons($customNavButtons)
+    {
+        $this->customNavButtons = $customNavButtons;
+        ;
+        return $this;
+    }
+
 	/**
 	 *
 	 * Repositiry attribute used for sort data
@@ -366,16 +387,21 @@ class Grid
 
         return $this;
     }
-	/**
-	 *
-	 * Add column to Grid
-	 * @param string $title
-	 * @param string $repositoryAttribute
-	 * @param int $width
-	 */
-	public function addColumn($title, $repositoryAttribute, $width, $callbackFunction = false, $searchOptions)
+
+    /**
+     *
+     * Add column to Grid
+     * @param string $title
+     * @param string $repositoryAttribute
+     * @param int $width
+     * @param bool $callbackFunction
+     * @param string $searchType
+     * @param $searchOptions
+     * @return $this
+     */
+	public function addColumn($title, $repositoryAttribute, $width, $callbackFunction = false, $searchType='text', $searchOptions)
 	{
-		$this->columnCollection->add(new Column($title, $repositoryAttribute, $width, $callbackFunction,$searchOptions));
+		$this->columnCollection->add(new Column($title, $repositoryAttribute, $width, $callbackFunction,$searchType,$searchOptions));
 
 		return $this;
 	}
@@ -411,32 +437,56 @@ class Grid
 
 
         jQuery("{$this->gridIdentifier}").jqGrid($jsonInit);
-        jQuery("{$this->gridIdentifier}").jqGrid('navGrid','$this->pagerDivIdentifier',{edit:false,add:false,del:false});
-        jQuery("{$this->gridIdentifier}").jqGrid('filterToolbar','$this->pagerDivIdentifier',{searchOperators : false});
-
-
+        jQuery("{$this->gridIdentifier}").jqGrid('navGrid','$this->pagerDivIdentifier',{edit:false,add:false,del:false})
 JS;
+        if(!empty($this->customNavButtons)){
+            foreach($this->customNavButtons as $customNavButton){
+                $js .= ".jqGrid('navButtonAdd', '$this->pagerDivIdentifier'," .
+                    Json::encode(
+                        $customNavButton,
+                        false,
+                        array('enableJsonExprFinder' => true))
+                    .")";
+            }
+        }
+        $js .= ';';
+        $js .= <<<JS
+        jQuery("{$this->gridIdentifier}").jqGrid('filterToolbar','$this->pagerDivIdentifier',{searchOperators : false});
+JS;
+
+
 		if ($moreJs = $this->_dataTypeStrategy->getAditionalJavaScript() and $js .= $moreJs);
 		return $js;
 	}
 
 
-    public function getGridFilterPostDataJS()
+    public function getGridFilterPostDataJS($additionalPostData=array())
     {
         $js = '';
-
+        $js .= 'var arrPostDataFields = {};' ."\n";
+        $js .= 'var arrPostData = {};' ."\n";
         if(!empty($this->postDataFields)){
-            $js .= 'var arrPostDataFields = {};' ."\n";
+            foreach($this->postDataFields as $field => $jsonValue)
+            {
+                $js .= 'arrPostDataFields["'.$field.'"]' . ' = '  . str_replace("%field%",$field,$jsonValue)  . "\n";
+            }
         }
-        foreach($this->postDataFields as $field => $jsonValue)
-        {
-            $js .= 'arrPostDataFields["'.$field.'"]' . ' = '  . str_replace("%field%",$field,$jsonValue)  . "\n";
+
+        if(!empty($additionalPostData)){
+            foreach($additionalPostData as $postDataField => $postDataValue){
+                $js .= 'arrPostData["'.$postDataField.'"]' . ' = "' .$postDataValue .'"' . "\n";
+            }
         }
         $js .= <<<JS
         var objPostData={};
         if(arrPostDataFields){
             jQuery.each(arrPostDataFields, function( index, value ) {
               objPostData[index] = jQuery('#'+index).val();
+            });
+        }
+        if(arrPostData){
+            jQuery.each(arrPostData, function( index, value ) {
+              objPostData[index] = value;
             });
         }
         console.log(objPostData);
@@ -464,7 +514,10 @@ JS;
 		return array(
 			'datatype' 		=> $this->dataType,
 			'caption' 		=> $this->caption,
-            'height'        => $this->getHeight()
+            'height'        => $this->getHeight(),
+            'shrinkToFit'   => true,
+            'sortorder'     => 'DESC',
+            'firstsortorder'=> 'DESC'
 		);
 	}
 
