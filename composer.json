@@ -1,5 +1,5 @@
 {
-    "name": "djuki/jqgrider",
+    "name": "vkislichenko/jqgrider",
     "type": "library",
     "description": "Generating jqGrid from PHP",
     "keywords": ["jqgrid","grid"],
