@@ -399,7 +399,7 @@ class Grid
      * @param $searchOptions
      * @return $this
      */
-	public function addColumn($title, $repositoryAttribute, $width, $callbackFunction = false, $searchType='text', $searchOptions)
+	public function addColumn($title, $repositoryAttribute, $width, $callbackFunction = false, $searchType='text', $$searchOptions=false)
 	{
 		$this->columnCollection->add(new Column($title, $repositoryAttribute, $width, $callbackFunction,$searchType,$searchOptions));
 
