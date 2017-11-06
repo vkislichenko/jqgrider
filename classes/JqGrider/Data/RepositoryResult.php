@@ -48,6 +48,7 @@ class RepositoryResult
 		$repository = $grid->getRespository();
 
 		$conditions = new Conditions();
+        $conditions->setGrid($grid);
 		$conditions->initConditions();
 
 		// Call implementator to convert resource into setup data type
