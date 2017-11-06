@@ -209,7 +209,7 @@ class Conditions
             if(!isset($_REQUEST[$name])) continue;
             $value = $_REQUEST[$name];
 
-            this->searchConditions[$name] = ['LIKE' => sprintf('"%%%s%%"', $value)];
+            $this->searchConditions[$name] = ['LIKE' => sprintf('"%%%s%%"', $value)];
         }
     }
 }
