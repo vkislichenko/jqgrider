@@ -120,15 +120,20 @@ class Column
 	 * @param int $width
 	 * @param mixed $callbackFunction
 	 */
-	public function __construct($title, $repositoryAttribute, $width,
-                                $callbackFunction = false,$searchType='text',$searchOptions=false)
+	public function __construct(array $config)
 	{
-		$this->title = $title;
-		$this->repositoryAttribute = $repositoryAttribute;
-		$this->width = $width;
-		$this->callbackFunction = $callbackFunction;
-        $this->searchType = $searchType;
-        $this->searchOptions = $searchOptions;
+	    $config = array_merge([
+            'title' => null,
+            'repositoryAttribute' => null,
+            'width' => null,
+            'callbackFunction' => null,
+            'searchType' => 'text',
+            'searchOptions' => null,
+        ],$config);
+
+	    foreach($config as $k => $v) {
+	        $this->{$k} = $v;
+        }
 	}
 	
 	/**

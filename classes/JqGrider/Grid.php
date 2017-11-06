@@ -326,7 +326,6 @@ class Grid
     public function setCustomNavButtons($customNavButtons)
     {
         $this->customNavButtons = $customNavButtons;
-        ;
         return $this;
     }
 
@@ -372,19 +371,25 @@ class Grid
 	 * @param string $dataType
 	 * @param array $options
 	 */
-	public function __construct($dataType, $options = array())
+	public function __construct($dataType = self::DATA_TYPE_JSON, $options = array())
 	{
 		$this->dataType = $dataType;
 
 		$this->columnCollection = new ColumnCollection();
 
 		$this->_dataTypeStrategy = Data\Type\Factory::createImplementator($this->dataType);
+
+		$this->init();
 	}
+
+    /**
+     * Init function all chilldren can overrite for own logic
+     */
+	public function init() {}
 
     public function setCaption($caption)
     {
         $this->caption = $caption;
-
         return $this;
     }
 
@@ -399,9 +404,9 @@ class Grid
      * @param $searchOptions
      * @return $this
      */
-	public function addColumn($title, $repositoryAttribute, $width, $callbackFunction = false, $searchType='text', $searchOptions=false)
+	public function addColumn($config)
 	{
-		$this->columnCollection->add(new Column($title, $repositoryAttribute, $width, $callbackFunction,$searchType,$searchOptions));
+		$this->columnCollection->add(new Column($config));
 
 		return $this;
 	}
@@ -539,9 +544,12 @@ JS;
 
             );
             $searchOptions = $column->getSearchOptions();
+//var_dump($searchOptions, !empty($searchOptions));
             if(!empty($searchOptions)){
                 $columnModelAttributes['stype']     = $column->getSearchType()?:'text';
                 $columnModelAttributes['searchoptions'] = $column->getSearchOptions();
+            } else {
+                $columnModelAttributes['search']     = false;
             }
             $columnModel[] = $columnModelAttributes;
 		}
@@ -549,7 +557,7 @@ JS;
 
 		$options['colNames'] = $columnNames;
 		$options['colModel'] = $columnModel;
-
+// exit;
 		return $options;
 	}
     /**
@@ -596,6 +604,15 @@ JS;
 	public function getColumnCollection()
 	{
 		return $this->columnCollection;
+	}
+
+	/**
+	 * Set data type
+	 */
+	public function setDataType($dataType)
+	{
+        $this->dataType = $dataType;
+		return $this;
 	}
 
 	/**

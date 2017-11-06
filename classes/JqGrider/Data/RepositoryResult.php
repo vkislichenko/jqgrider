@@ -60,7 +60,7 @@ class RepositoryResult
 	/**
 	 *
 	 * Create resource for json data answer
-	 * @param Data\IGridRepository $repository
+	 * @param IGridRepository $repository
 	 * @param Conditions $conditions
 	 * @param Grid $grid
 	 *
