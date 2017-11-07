@@ -9,7 +9,6 @@
 */
 
 namespace JqGrider\Data;
-use Conditions;
 
 interface IGridRepository
 {

@@ -13,9 +13,7 @@ namespace JqGrider\Grid;
 class Column
 {
 	const ALIGN_LEFT = 'left';
-	
 	const ALIGN_RIGHT = 'right';
-	
 	const ALIGN_CENTER = 'center';
 	
 	
@@ -39,7 +37,7 @@ class Column
 	 * @var int
 	 */
 	protected $width;
-	
+
 	/**
 	 * 
 	 * Column text alignment
@@ -54,7 +52,56 @@ class Column
 	 */
 	protected $callbackFunction;
 
+    /**
+     * @var array
+     */
     protected $searchOptions;
+
+    /**
+     * @var string
+     */
+    protected $searchType;
+
+    /**
+     * @var string
+     */
+    protected $template;
+
+    /**
+     * @var string
+     */
+    protected $formatter;
+
+    /**
+     * @var mixed
+     */
+    protected $formatoptions;
+
+
+    /**
+	 * 
+	 * Constructor
+	 * 
+	 * @param string $title
+	 * @param string $repositoryAttribute
+	 * @param int $width
+	 * @param mixed $callbackFunction
+	 */
+	public function __construct(array $config)
+	{
+	    $config = array_merge([
+            'title' => null,
+            'repositoryAttribute' => null,
+            'width' => null,
+            'callbackFunction' => null,
+            'searchType' => 'text',
+            'searchOptions' => null,
+        ],$config);
+
+	    foreach($config as $k => $v) {
+	        $this->{$k} = $v;
+        }
+	}
 
     /**
      * @return string
@@ -73,8 +120,6 @@ class Column
         $this->align = $align;
         return $this;
     }
-
-    protected $searchType;
 
     /**
      * @return string
@@ -111,30 +156,6 @@ class Column
         $this->searchOptions = $searchOptions;
         return $this;
     }
-	/**
-	 * 
-	 * Constructor
-	 * 
-	 * @param string $title
-	 * @param string $repositoryAttribute
-	 * @param int $width
-	 * @param mixed $callbackFunction
-	 */
-	public function __construct(array $config)
-	{
-	    $config = array_merge([
-            'title' => null,
-            'repositoryAttribute' => null,
-            'width' => null,
-            'callbackFunction' => null,
-            'searchType' => 'text',
-            'searchOptions' => null,
-        ],$config);
-
-	    foreach($config as $k => $v) {
-	        $this->{$k} = $v;
-        }
-	}
 	
 	/**
 	 * Get anonymous function for callback
@@ -167,6 +188,58 @@ class Column
 	public function getWidth()
 	{
 		return $this->width;
+	}
+
+	/**
+	 * Set column template
+	 */
+	public function setTemplate($template)
+	{
+		$this->template = $template;
+        return $this;
+	}
+
+    /**
+     * Get column template
+     */
+	public function getTemplate()
+	{
+		return $this->template;
+	}
+
+	/**
+	 * Set column template
+	 */
+	public function setFormatter($formatter)
+	{
+		$this->formatter = $formatter;
+        return $this;
+	}
+
+    /**
+     * Get column template
+     */
+	public function getFormatter()
+	{
+		return $this->formatter;
+	}
+
+
+	/**
+	 * Set column template
+	 */
+	public function setFormatOptions($formatoptions)
+	{
+		$this->formatoptions = $formatoptions;
+        return $this;
+	}
+
+    /**
+     * Get column template
+     */
+	public function getFormatOptions()
+	{
+		return $this->formatoptions;
 	}
 	
 }

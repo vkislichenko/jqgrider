@@ -209,7 +209,39 @@ class Conditions
             if(!isset($_REQUEST[$name])) continue;
             $value = $_REQUEST[$name];
 
-            $this->searchConditions[$name] = ['LIKE' => sprintf('"%%%s%%"', $value)];
+            $operator = 'like';
+
+            $searchOtions = $item->getSearchOptions();
+            if(isset($searchOtions['sopt']) && isset($searchOtions['sopt'][$value])) {
+                $operator = $searchOtions['sopt'][$value];
+            }
+
+
+            $this->searchConditions[$name] = $this->addColumnSearchCondition($value, $operator);
         }
+    }
+
+    public function addColumnSearchCondition($value, $operator = 'like')
+    {
+        $result = null;
+        switch($operator) {
+            case 'eq' : // Equal
+            {
+                $result = $value;
+                break;
+            }
+            case 'ne' : // Not equal
+            {
+                $result = ['!=' => $value];
+                break;
+            }
+            case 'like': // like
+            {
+                $result = ['LIKE' => sprintf('"%%%s%%"', $value)];
+                break;
+            }
+            default: break;
+        }
+        return $result;
     }
 }

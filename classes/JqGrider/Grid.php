@@ -115,6 +115,47 @@ class Grid
 
     protected $width;
 
+    protected $actionsNavOptions;
+
+    protected $gridComplete;
+
+    /**
+     *
+     * Repositiry attribute used for sort data
+     * @var string
+     */
+    protected $sortName = 'id';
+
+    /**
+     *
+     * View records
+     * @var bool
+     */
+    protected $viewRecords = true;
+
+    /**
+     *
+     * Row list for dropdown,
+     * where we can pick rows per page
+     *
+     * @var array
+     */
+    protected $rowList = array(10, 20, 30);
+
+    /**
+     *
+     * Sort order
+     * @var string
+     */
+    protected $sortOrder = self::SORT_ORDER_ASC;
+
+    /**
+     * Load once parameter
+     * @var bool
+     */
+    protected $loadOnce = false;
+
+
     /**
      * @return string
      */
@@ -329,41 +370,7 @@ class Grid
         return $this;
     }
 
-	/**
-	 *
-	 * Repositiry attribute used for sort data
-	 * @var string
-	 */
-	protected $sortName = 'id';
 
-	/**
-	 *
-	 * View records
-	 * @var bool
-	 */
-	protected $viewRecords = true;
-
-	/**
-	 *
-	 * Row list for dropdown,
-	 * where we can pick rows per page
-	 *
-	 * @var array
-	 */
-	protected $rowList = array(10, 20, 30);
-
-	/**
-	 *
-	 * Sort order
-	 * @var string
-	 */
-	protected $sortOrder = self::SORT_ORDER_ASC;
-
-	/**
-	 * Load once parameter
-	 * @var bool
-	 */
-	protected $loadOnce = false;
 
 	/**
 	 * Constructor
@@ -387,11 +394,7 @@ class Grid
      */
 	public function init() {}
 
-    public function setCaption($caption)
-    {
-        $this->caption = $caption;
-        return $this;
-    }
+
 
     /**
      *
@@ -421,7 +424,9 @@ class Grid
 
 		$options = $this->addColumnsToOptions($options);
 
-		$options = $this->_dataTypeStrategy->addDetailsToOptions($options, $this);
+		$options = $this->addActionsNavToOptions($options);
+
+        $options = $this->_dataTypeStrategy->addDetailsToOptions($options, $this);
 
         return Json::encode(
             $options,
@@ -522,7 +527,8 @@ JS;
             'height'        => $this->getHeight(),
             'shrinkToFit'   => true,
             'sortorder'     => 'DESC',
-            'firstsortorder'=> 'DESC'
+            'firstsortorder'=> 'DESC',
+            'autowidth'     => true,
 		);
 	}
 
@@ -541,10 +547,15 @@ JS;
             $columnModelAttributes = array(
                 'name' 		=> $column->getRepositoryAttribute(),
                 'index' 	=> $column->getRepositoryAttribute(),
-
             );
+
+            if($column->getWidth()) $columnModelAttributes['width'] = $column->getWidth();
+            if($column->getTemplate()) $columnModelAttributes['template'] = $column->getTemplate();
+            if($column->getAlign()) $columnModelAttributes['align'] = $column->getAlign();
+            if($column->getFormatter()) $columnModelAttributes['formatter'] = $column->getFormatter();
+            if($column->getFormatOptions()) $columnModelAttributes['formatoptions'] = $column->getFormatOptions();
+
             $searchOptions = $column->getSearchOptions();
-//var_dump($searchOptions, !empty($searchOptions));
             if(!empty($searchOptions)){
                 $columnModelAttributes['stype']     = $column->getSearchType()?:'text';
                 $columnModelAttributes['searchoptions'] = $column->getSearchOptions();
@@ -557,9 +568,37 @@ JS;
 
 		$options['colNames'] = $columnNames;
 		$options['colModel'] = $columnModel;
-// exit;
+
 		return $options;
 	}
+
+	public function addActionsNavToOptions($options)
+    {
+        if(!$this->getActionsNavOptions()) return $options;
+        $options['actionsNavOptions'] = $this->getActionsNavOptions();
+        return $options;
+    }
+
+
+    /**
+     * @param string $caption
+     * @return $this
+     */
+    public function setCaption($caption)
+    {
+        $this->caption = $caption;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCaption()
+    {
+        return $this->caption;
+    }
+
+
     /**
      * @param string $sortName
      * @return Grid
@@ -633,6 +672,42 @@ JS;
 
 		return $this;
 	}
+
+    /**
+     * @param array $options
+     * @return $this
+     */
+    public function setActionsNavOptions($options)
+    {
+        $this->actionsNavOptions = $options;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getActionsNavOptions()
+    {
+        return $this->actionsNavOptions;
+    }
+
+    /**
+     * @param array $options
+     * @return $this
+     */
+    public function setGridComplete($gridComplete)
+    {
+        $this->gridComplete = $gridComplete;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getGridComplete()
+    {
+        return $this->gridComplete;
+    }
 
 	/**
 	 * Print resposiroty data in results format
