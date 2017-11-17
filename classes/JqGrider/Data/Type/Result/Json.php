@@ -18,6 +18,22 @@ class Json implements IResultType
 	 */
 	public function printData($resultResource)
 	{
-		print json_encode($resultResource);
+        $resultResource->rows = $this->castToUtf8($resultResource->rows);
+		$result = json_encode($resultResource, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE);
+		if(empty($result)) {
+            $result = json_last_error_msg();
+        }
+        print $result;
 	}
+
+	public function castToUtf8($array)
+    {
+        array_walk_recursive($array, function(&$item, $key){
+            if(!mb_detect_encoding($item, 'utf-8', true)){
+                $item = utf8_encode($item);
+            }
+        });
+
+        return $array;
+    }
 }
