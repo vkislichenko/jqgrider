@@ -116,11 +116,11 @@ class RepositoryResult
 				{
 					if (is_array($repositoryRow))
 					{
-						$jsonFriendlyColl[] = $callback($repositoryRow[$column->getRepositoryAttribute()]);
+						$jsonFriendlyColl[] = $callback($repositoryRow[$column->getRepositoryAttribute()], $repositoryRow);
 					}
 					elseif (is_object($repositoryRow))
 					{
-						$jsonFriendlyColl[] = $callback($repositoryRow->{$column->getRepositoryAttribute()});
+						$jsonFriendlyColl[] = $callback($repositoryRow->{$column->getRepositoryAttribute()}, $repositoryRow);
 					}
 				}
 				else
